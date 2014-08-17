@@ -1,6 +1,8 @@
+#include <Bounce.h>
 #define HWSERIAL Serial1
 
-const int channel = 1;
+const int midiChannel = 1;
+const long debounceMS = 500;
 
 struct ccControl {
   int btnPin;
@@ -17,8 +19,8 @@ struct ccControl {
 ccControl local = { 5, 21, HIGH, LOW, 127, 0, 122, "local" };
 ccControl arp = { 6, 13, HIGH, LOW, 0, 127, 117, "arp hold" };
 
-long time = 0;
-long debounce = 500;
+Bounce localBtn = Bounce(local.btnPin, debounceMS);
+Bounce arpBtn = Bounce(arp.btnPin, debounceMS);
 
 char buffer[60];
 
@@ -33,11 +35,14 @@ void setup() {
 
 void loop() {
 
-  local.reading = digitalRead(local.btnPin);
-  processButtonState(local);
+  localBtn.update();
+  arpBtn.update();
 
-  arp.reading = digitalRead(arp.btnPin);
-  processButtonState(arp);
+  local.reading = localBtn.read();
+  processButtonState(localBtn, local);
+
+  arp.reading = arpBtn.read();
+  processButtonState(arpBtn, arp);
 
 }
 
@@ -55,33 +60,28 @@ void sendCC(int cmd, int data1, int data2) {
   HWSERIAL.write(cmd);
   HWSERIAL.write(data1);
   HWSERIAL.write(data2);
-  Serial.println(cmd, DEC);
-  Serial.println(data1, DEC);
-  Serial.println(data2, DEC);
+
+  // Serial.println(cmd, DEC);
+  // Serial.println(data1, DEC);
+  // Serial.println(data2, DEC);
 }
 
 
-void processButtonState(struct ccControl &control) {
-  if (control.reading == HIGH && control.previous == LOW && millis() - time > debounce) {
+void processButtonState(Bounce btn, struct ccControl &control) {
+  if (control.reading != control.previous && btn.fallingEdge()) {
     if (control.state == HIGH) {
-      usbMIDI.sendControlChange(control.cc, control.stateOff, channel);
+      usbMIDI.sendControlChange(control.cc, control.stateOff, midiChannel);
       sendCC(control.cc, control.stateOff, control.stateOff);
       sprintf(buffer, "Toggle %s led on: %x", control.name, control.stateOff);
-      Serial.println(buffer);
     } else {
-      usbMIDI.sendControlChange(control.cc, control.stateOn, channel);
+      usbMIDI.sendControlChange(control.cc, control.stateOn, midiChannel);
       sendCC(control.cc, control.stateOn, control.stateOn);
       sprintf(buffer, "Toggle %s led off: %x", control.name, control.stateOn);
-      Serial.println(buffer);
     }
+    // Serial.println(buffer);
     digitalWrite(control.ledPin, control.state);
 
-    if (control.state == HIGH)
-      control.state = LOW;
-    else
-      control.state = HIGH;
-
-    time = millis();
+    control.state = !control.state;
   }
   control.previous = control.reading;
 }
