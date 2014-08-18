@@ -1,5 +1,5 @@
 #include <Bounce.h>
-#define HWSERIAL Serial1
+#include <MIDI.h>
 
 const int midiChannel = 1;
 const long debounceMS = 500;
@@ -26,8 +26,7 @@ char buffer[60];
 
 
 void setup() {
-  Serial.begin(31250);
-  HWSERIAL.begin(31250);
+  MIDI.begin();
   initUI(local);
   initUI(arp);
 }
@@ -50,20 +49,7 @@ void loop() {
 void initUI(struct ccControl control) {
   pinMode(control.btnPin, INPUT_PULLUP);
   pinMode(control.ledPin, OUTPUT);
-  sprintf(buffer, "Init MIDI value: %x", control.stateOn);
-  Serial.println(buffer);
   digitalWrite(control.ledPin, control.previous);
-}
-
-
-void sendCC(int cmd, int data1, int data2) {
-  HWSERIAL.write(cmd);
-  HWSERIAL.write(data1);
-  HWSERIAL.write(data2);
-
-  // Serial.println(cmd, DEC);
-  // Serial.println(data1, DEC);
-  // Serial.println(data2, DEC);
 }
 
 
@@ -71,12 +57,12 @@ void processButtonState(Bounce btn, struct ccControl &control) {
   if (control.reading != control.previous && btn.fallingEdge()) {
     if (control.state == HIGH) {
       usbMIDI.sendControlChange(control.cc, control.stateOff, midiChannel);
-      sendCC(control.cc, control.stateOff, control.stateOff);
-      sprintf(buffer, "Toggle %s led on: %x", control.name, control.stateOff);
+      MIDI.sendControlChange(control.cc, control.stateOff, midiChannel);
+      // sprintf(buffer, "Toggle %s led on: %x", control.name, control.stateOff);
     } else {
       usbMIDI.sendControlChange(control.cc, control.stateOn, midiChannel);
-      sendCC(control.cc, control.stateOn, control.stateOn);
-      sprintf(buffer, "Toggle %s led off: %x", control.name, control.stateOn);
+      MIDI.sendControlChange(control.cc, control.stateOn, midiChannel);
+      // sprintf(buffer, "Toggle %s led off: %x", control.name, control.stateOn);
     }
     // Serial.println(buffer);
     digitalWrite(control.ledPin, control.state);
