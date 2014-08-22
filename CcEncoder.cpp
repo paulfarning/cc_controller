@@ -31,13 +31,21 @@ void CcEncoder::begin() {
 void CcEncoder::update() {
 
   int move = _encoder.tick();
-  if (move == '>' && _value < _maxValue) {
-    _value++;
+  if (move == '>') {
+    if (_value < _maxValue) {
+      _value++;
+    } else {
+      _value = _minValue;
+    }
     Serial.println("greater than");
     Serial.print(char(move));
     Serial.print(_value);
-  } else if (move == '<' && _value > _minValue) {
-    _value--;
+  } else if (move == '<') {
+    if (_value > _minValue) {
+      _value--;
+    } else {
+      _value = _maxValue;
+    }
     Serial.println("less than");
     Serial.print(char(move));
     Serial.print(_value);
