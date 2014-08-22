@@ -7,21 +7,28 @@
 const int midiChannel = 1;
 const long debounceMS = 500;
 
-char buffer[60];
+// char buffer[60];
 
-CcButton controls[] = {
-  CcButton(5, 21, HIGH, LOW, 127, 0, 122, "local"),
-  CcButton(6, 13, HIGH, LOW, 0, 127, 117, "arp hold"),
-  CcButton(7, 22, HIGH, LOW, 127, 0, 110, "lfo"),
-  CcButton(8, 23, HIGH, LOW, 0, 127, 109, "legato")
+
+CcButton CcButtons[] = {
+  CcButton(5, 21, HIGH, LOW, 127, 0, 122, midiChannel, debounceMS, "Local"),
+  CcButton(6, 13, HIGH, LOW, 0, 127, 117, midiChannel, debounceMS, "Arp Hold"),
+  CcButton(7, 22, HIGH, LOW, 127, 0, 110, midiChannel, debounceMS, "LFO"),
+  CcButton(8, 23, HIGH, LOW, 0, 127, 109, midiChannel, debounceMS, "Legato")
 };
+
+
+// Encoder Encoders[] = {
+//   Encoder(9, "CC Number"),
+//   Encoder(10, "CC Value")
+// };
 
 
 void setup() {
   MIDI.begin();
 
-  for(int i = 0; i < ARRAY_SIZE(controls); i++) {
-    controls[i].begin();
+  for(int i = 0; i < ARRAY_SIZE(CcButtons); i++) {
+    CcButtons[i].begin();
   }
 
 }
@@ -29,8 +36,8 @@ void setup() {
 
 void loop() {
 
-  for(int i = 0; i < ARRAY_SIZE(controls); i++) {
-    controls[i].update();
+  for(int i = 0; i < ARRAY_SIZE(CcButtons); i++) {
+    CcButtons[i].update();
   }
 
 }
