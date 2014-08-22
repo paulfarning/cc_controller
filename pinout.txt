@@ -1,0 +1,17 @@
+2 midi
+5 buttons
+2 encoder buttons
+4 encoders
+4 leds
+12 display
+
+
+
+0: Midi in
+1: Midi out
+2: Encoder send
+3-6: CC Toggles
+7-10: CC LEDs
+12-23: Display
+26-28: Encoder 1
+29-31: Encoder 2
