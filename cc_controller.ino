@@ -72,25 +72,24 @@ void loop() {
     }
   }
 
-  // for(int i = 0; i < ARRAY_SIZE(CcButtons); i++) {
+  // for (int i = 0; i < ARRAY_SIZE(CcButtons); i++) {
   //   CcButtons[i].update();
   // }
 
 
 
-  for(int i = 0; i < ARRAY_SIZE(CcEncoders); i++) {
+  for (int i = 0; i < ARRAY_SIZE(CcEncoders); i++) {
     CcEncoders[i].update();
-    if (CcEncoders[i].showValue()) {
-      writeToDisplay(CcEncoders[i].read(), ' ');
-      // encoderTimeouts[i] == CcEncoders[i].getStartTime();
-    }
   }
 
-  // int maxIndex = getIndexOfMaximumValue(encoderTimeouts, ARRAY_SIZE(encoderTimeouts));
-  // writeToDisplay(CcEncoders[maxIndex].read(), ' ');
 
+  int encoderToDisplay = getEncoderToDisplay();
+  if (encoderToDisplay != -1) {
+    writeToDisplay(CcEncoders[encoderToDisplay].read(), ' ');
+  }
 
 }
+
 
 void setupDisplay() {
   int displayType = COMMON_CATHODE;
@@ -112,9 +111,25 @@ void setupDisplay() {
   int segG = 12; //Pin 7
   int segDP= 11; //Pin 5
 
-  bubbleDisplay.Begin(displayType, numberOfDigits, digit1, digit2, digit3, digit4, segA, segB, segC, segD, segE, segF, segG, segDP);
+  bubbleDisplay.Begin(
+    displayType,
+    numberOfDigits,
+    digit1,
+    digit2,
+    digit3,
+    digit4,
+    segA,
+    segB,
+    segC,
+    segD,
+    segE,
+    segF,
+    segG,
+    segDP
+  );
   bubbleDisplay.SetBrightness(100);
 }
+
 
 void writeToDisplay(int value, int prefix) {
   char tempString[10];
@@ -124,16 +139,17 @@ void writeToDisplay(int value, int prefix) {
 }
 
 
-// int getIndexOfMaximumValue(long* array, long size){
-//   int maxIndex = 0;
-//   int max = array[maxIndex];
-//   for (int i = 1; i < size; i++) {
-//     if (max < array[i]){
-//       max = array[i];
-//       maxIndex = i;
-//     }
-//   }
-//   return maxIndex;
-// }
+int getEncoderToDisplay() {
+
+  int encoderIndex = -1;
+  unsigned long maxTime = 0;
+  for (int i = 0; i < ARRAY_SIZE(CcEncoders); i++) {
+    if (CcEncoders[i].showValue() && CcEncoders[i].getStartTime() > maxTime) {
+      encoderIndex = i;
+    }
+  }
+  return encoderIndex;
+
+}
 
 
