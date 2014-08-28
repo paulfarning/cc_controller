@@ -20,6 +20,9 @@ CcEncoder::CcEncoder(
   _minValue = minValue;
   _ccName = ccName;
   _value = 0;
+  _displayValue = false;
+  _displayTimeout = 4000;
+  _startTime = 0;
 }
 
 
@@ -31,28 +34,31 @@ void CcEncoder::begin() {
 void CcEncoder::update() {
 
   int move = _encoder.tick();
-  if (move == '>') {
-    if (_value < _maxValue) {
-      _value++;
-    } else {
-      _value = _minValue;
+
+  if (move == '>' || move == '<') {
+    if (move == '>') {
+      _value = _value < _maxValue ? _value + 1 : _minValue;
+    } else if (move == '<') {
+      _value = _value > _minValue ? _value - 1 : _maxValue;
     }
-    Serial.println("greater than");
-    Serial.print(char(move));
-    Serial.print(_value);
-  } else if (move == '<') {
-    if (_value > _minValue) {
-      _value--;
-    } else {
-      _value = _maxValue;
+    _startTime = millis();
+    _displayValue = true;
+  } else {
+    if (millis() - _startTime > _displayTimeout) {
+      _displayValue = false;
     }
-    Serial.println("less than");
-    Serial.print(char(move));
-    Serial.print(_value);
   }
 
 }
 
 int CcEncoder::read() {
   return _value;
+}
+
+int CcEncoder::showValue() {
+  return _displayValue;
+}
+
+int CcEncoder::getStartTime() {
+  return _startTime;
 }

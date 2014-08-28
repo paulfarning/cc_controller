@@ -20,6 +20,8 @@ class CcEncoder {
     void begin();         // Initialize. Call from setup.
     void update();        // Process. Call from loop.
     int read();           // Get the current value of encoder.
+    int showValue();      // Whether or not to display value.
+    int getStartTime();   // Return time last changed.
   private:
     int _pin1;            // Leg 1 pin.
     int _pin2;            // Leg 3 pin.
@@ -28,6 +30,9 @@ class CcEncoder {
     char * _ccName;       // Name for control.
     QuadEncoder _encoder; // Encoder.
     int _value;           // Encoder value.
+    int _displayValue = false;
+    long _displayTimeout = 4000;
+    long _startTime = 0;
 };
 
 #endif
