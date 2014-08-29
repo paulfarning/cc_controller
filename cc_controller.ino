@@ -9,16 +9,11 @@
 
 const int midiChannel = 1;
 const int debounceMS = 500;
-const int sendEncodersBtnPin = 9;
+const int sendEncodersBtnPin = 4;
 const int initDelay = 4000;
 
-// long encoderTimeouts[] = { 0, 0 };
-
 unsigned long currentMillis;
-
-
-// long previousMillis = 0;
-// long interval = 4000;
+int encoderToDisplay = -1;
 
 SevSeg bubbleDisplay;
 
@@ -30,8 +25,8 @@ SevSeg bubbleDisplay;
 // };
 
 CcEncoder CcEncoders[] = {
-  CcEncoder(7, 6, 127, 0, "CC Number"),
-  CcEncoder(9, 8, 127, 0, "CC Value")
+  CcEncoder(7, 6, 5, 127, 0, debounceMS, "CC Number"),
+  CcEncoder(9, 8, 10, 127, 0, debounceMS, "CC Value")
 };
 
 Bounce sendEncodersBtn = Bounce(sendEncodersBtnPin, debounceMS);
@@ -44,14 +39,17 @@ Bounce sendEncodersBtn = Bounce(sendEncodersBtnPin, debounceMS);
 void setup() {
   Serial.begin(9600);
   MIDI.begin();
-  pinMode(9, INPUT_PULLUP);
+  pinMode(4, INPUT_PULLUP);
 
   // for(int i = 0; i < ARRAY_SIZE(CcButtons); i++) {
   //   CcButtons[i].begin();
   // }
 
-  setupDisplay();
+  for(int i = 0; i < ARRAY_SIZE(CcEncoders); i++) {
+    CcEncoders[i].begin();
+  }
 
+  setupDisplay();
 
 }
 
@@ -60,7 +58,7 @@ void loop() {
 
   currentMillis = millis();
 
-  if (currentMillis < initDelay) {
+  if (currentMillis < initDelay && encoderToDisplay == -1) {
     writeToDisplay(midiChannel, 'c');
   }
 
@@ -83,7 +81,7 @@ void loop() {
   }
 
 
-  int encoderToDisplay = getEncoderToDisplay();
+  encoderToDisplay = getEncoderToDisplay();
   if (encoderToDisplay != -1) {
     writeToDisplay(CcEncoders[encoderToDisplay].read(), ' ');
   }
@@ -140,16 +138,15 @@ void writeToDisplay(int value, int prefix) {
 
 
 int getEncoderToDisplay() {
-
   int encoderIndex = -1;
   unsigned long maxTime = 0;
   for (int i = 0; i < ARRAY_SIZE(CcEncoders); i++) {
     if (CcEncoders[i].showValue() && CcEncoders[i].getStartTime() > maxTime) {
       encoderIndex = i;
     }
+    maxTime = CcEncoders[i].getStartTime();
   }
   return encoderIndex;
-
 }
 
 

@@ -4,18 +4,22 @@
 */
 
 #include "Arduino.h"
+#include "Bounce.h"
 #include "QuadEncoder.h"
 #include "CcEncoder.h"
 
 CcEncoder::CcEncoder(
   int pin1,
   int pin2,
+  int pin3,
   int maxValue,
   int minValue,
+  int debounceMS,
   char ccName[]
-) : _encoder(pin1, pin2) {
+) : _encoder(pin1, pin2), _btn(pin3, debounceMS) {
   _pin1 = pin1;
   _pin2 = pin2;
+  _pin3 = pin3;
   _maxValue = maxValue;
   _minValue = minValue;
   _ccName = ccName;
@@ -27,7 +31,7 @@ CcEncoder::CcEncoder(
 
 
 void CcEncoder::begin() {
-
+  pinMode(_pin3, INPUT_PULLUP);
 }
 
 
@@ -48,6 +52,18 @@ void CcEncoder::update() {
       _displayValue = false;
     }
   }
+
+  if (_btn.update()) {
+    if (_btn.fallingEdge()) {
+      _startTime = millis();
+      _displayValue = true;
+    } else {
+      if (millis() - _startTime > _displayTimeout) {
+        _displayValue = false;
+      }
+    }
+  }
+
 
 }
 
