@@ -9,7 +9,7 @@
 
 const int midiChannel = 1;
 const int debounceMS = 500;
-const int sendEncodersBtnPin = 4;
+const int sendEncodersBtnPin = 2;
 const int initDelay = 4000;
 
 unsigned long currentMillis;
@@ -17,23 +17,19 @@ int encoderToDisplay = -1;
 
 SevSeg bubbleDisplay;
 
-// CcButton CcButtons[] = {
-//   CcButton(5, 21, HIGH, LOW, 127, 0, 122, midiChannel, debounceMS, "Local"),
-//   CcButton(6, 13, HIGH, LOW, 0, 127, 117, midiChannel, debounceMS, "Arp Hold"),
-//   CcButton(7, 22, HIGH, LOW, 127, 0, 110, midiChannel, debounceMS, "LFO"),
-//   CcButton(8, 23, HIGH, LOW, 0, 127, 109, midiChannel, debounceMS, "Legato")
-// };
+CcButton CcButtons[] = {
+  CcButton(3, 7, HIGH, LOW, 127, 0, 122, midiChannel, debounceMS, "Local"),
+  CcButton(4, 8, HIGH, LOW, 0, 127, 117, midiChannel, debounceMS, "Arp Hold"),
+  CcButton(5, 9, HIGH, LOW, 127, 0, 110, midiChannel, debounceMS, "LFO"),
+  CcButton(6, 10, HIGH, LOW, 0, 127, 109, midiChannel, debounceMS, "Legato")
+};
 
 CcEncoder CcEncoders[] = {
-  CcEncoder(7, 6, 5, 127, 0, debounceMS, "CC Number"),
-  CcEncoder(9, 8, 10, 127, 0, debounceMS, "CC Value")
+  CcEncoder(28, 27, 26, 127, 0, debounceMS, "CC Number"), // Left
+  CcEncoder(31, 30, 29, 127, 0, debounceMS, "CC Value") // Right
 };
 
 Bounce sendEncodersBtn = Bounce(sendEncodersBtnPin, debounceMS);
-
-
-
-// char buffer[60];
 
 
 void setup() {
@@ -41,9 +37,9 @@ void setup() {
   MIDI.begin();
   pinMode(4, INPUT_PULLUP);
 
-  // for(int i = 0; i < ARRAY_SIZE(CcButtons); i++) {
-  //   CcButtons[i].begin();
-  // }
+  for(int i = 0; i < ARRAY_SIZE(CcButtons); i++) {
+    CcButtons[i].begin();
+  }
 
   for(int i = 0; i < ARRAY_SIZE(CcEncoders); i++) {
     CcEncoders[i].begin();
@@ -65,21 +61,18 @@ void loop() {
 
   if (sendEncodersBtn.update()) {
     if (sendEncodersBtn.fallingEdge()) {
-      MIDI.sendControlChange(CcEncoders[0].read(), 108, midiChannel);
+      MIDI.sendControlChange(102, 108, midiChannel);
       Serial.print(CcEncoders[0].read());
     }
   }
 
-  // for (int i = 0; i < ARRAY_SIZE(CcButtons); i++) {
-  //   CcButtons[i].update();
-  // }
-
-
+  for (int i = 0; i < ARRAY_SIZE(CcButtons); i++) {
+    CcButtons[i].update();
+  }
 
   for (int i = 0; i < ARRAY_SIZE(CcEncoders); i++) {
     CcEncoders[i].update();
   }
-
 
   encoderToDisplay = getEncoderToDisplay();
   if (encoderToDisplay != -1) {
@@ -94,20 +87,20 @@ void setupDisplay() {
   int numberOfDigits = 4;
 
   // Declare what pins are connected to the GND pins (cathodes)
-  int digit1 = 23; //Pin 1
-  int digit2 = 22; //Pin 10
-  int digit3 = 21; //Pin 4
-  int digit4 = 20; //Pin 6
+  int digit1 = 11; //Pin 1
+  int digit2 = 12; //Pin 10
+  int digit3 = 14; //Pin 4
+  int digit4 = 15; //Pin 6
 
   // Declare what pins are connected to the segments (anodes)
-  int segA = 19; //Pin 12
-  int segB = 18; //Pin 11
-  int segC = 17; //Pin 3
-  int segD = 16; //Pin 8
-  int segE = 15; //Pin 2
-  int segF = 14; //Pin 9
-  int segG = 12; //Pin 7
-  int segDP= 11; //Pin 5
+  int segA = 16; // 19; //Pin 12
+  int segB = 17; // 18; //Pin 11
+  int segC = 18; // 17; //Pin 3
+  int segD = 19; // 16; //Pin 8
+  int segE = 20; // 15; //Pin 2
+  int segF = 21; // 14; //Pin 9
+  int segG = 22; // 12; //Pin 7
+  int segDP= 23; // 11; //Pin 5
 
   bubbleDisplay.Begin(
     displayType,
@@ -148,5 +141,3 @@ int getEncoderToDisplay() {
   }
   return encoderIndex;
 }
-
-

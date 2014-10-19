@@ -1,6 +1,6 @@
 /*
   CcButton.cpp - Library MIDI CC Controls.
-  Creates a button that toggles between two values off a specific
+  Creates a button that toggles between two values of a specific
   MIDI control along with corresponding LED.
 */
 

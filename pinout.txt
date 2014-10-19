@@ -6,24 +6,17 @@
 12 display
 
 
-
 0: Midi in
 1: Midi out
 2: Encoder send
 3-6: CC Toggles
 7-10: CC LEDs
 11-12 + 14-23: Display
-26-28: Encoder 1
-29-31: Encoder 2
+26-28: Encoder 1 left: button, left, right
+29-31: Encoder 2 right: button, left, right
+
 
 Features:
-1. display midichannel on load
-2. push encoder button to enter midichannel change mode, push again to set
-3. turn off display after a set interval of not turning encoders
-4. remember last settings
-
-
-Encoder writes to display.
-Delay 4 seconds or turn other encoder.
-Push encoder display value.
-Push both show midi channel.
+1. Push encoder button to enter midichannel change mode, push again to set
+2. Remember last settings
+3. Push both show midi channel.
