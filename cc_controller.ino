@@ -1,3 +1,21 @@
+/*
+  CC Controller
+
+  MIDI controller with 2 encoders, a 4 digit display, 5 buttons and 4 LEDs.
+  Four of the buttons toggle specific CC messages and a corresponding LED. The
+  encoders can be used to select a CC number and value to send with the fifth
+  button. The display shows the midi channel on startup and the encoder values
+  when editing or when pushed.
+
+  Built for Teensy 3.1.
+
+  Created 10.20.2014
+  By Paul Farning
+
+  https://github.com/paulfarning/cc_controller
+*/
+
+
 #include <Bounce.h>
 #include <MIDI.h>
 #include <QuadEncoder.h>
@@ -25,17 +43,20 @@ CcButton CcButtons[] = {
 };
 
 CcEncoder CcEncoders[] = {
-  CcEncoder(28, 27, 26, 127, 0, debounceMS, "CC Number"), // Left
-  CcEncoder(31, 30, 29, 127, 0, debounceMS, "CC Value") // Right
+  CcEncoder(28, 27, 26, 127, 0, debounceMS, "CC Number"), // Left encoder
+  CcEncoder(31, 30, 29, 127, 0, debounceMS, "CC Value") // Right encoder
 };
 
 Bounce sendEncodersBtn = Bounce(sendEncodersBtnPin, debounceMS);
 
 
+/*
+  Initializes inputs and outputs.
+*/
 void setup() {
   Serial.begin(9600);
   MIDI.begin();
-  pinMode(4, INPUT_PULLUP);
+  pinMode(4, INPUT_PULLUP); // WHY????
 
   for(int i = 0; i < ARRAY_SIZE(CcButtons); i++) {
     CcButtons[i].begin();
@@ -50,6 +71,9 @@ void setup() {
 }
 
 
+/*
+  Computes changes on all inputs and outputs.
+*/
 void loop() {
 
   currentMillis = millis();
@@ -57,7 +81,6 @@ void loop() {
   if (currentMillis < initDelay && encoderToDisplay == -1) {
     writeToDisplay(midiChannel, 'c');
   }
-
 
   if (sendEncodersBtn.update()) {
     if (sendEncodersBtn.fallingEdge()) {
@@ -82,25 +105,28 @@ void loop() {
 }
 
 
+/*
+  Initializes the 4 digit, 7 segment display.
+*/
 void setupDisplay() {
   int displayType = COMMON_CATHODE;
   int numberOfDigits = 4;
 
   // Declare what pins are connected to the GND pins (cathodes)
-  int digit1 = 11; //Pin 1
-  int digit2 = 12; //Pin 10
-  int digit3 = 14; //Pin 4
-  int digit4 = 15; //Pin 6
+  int digit1 = 11; // Display pin 1
+  int digit2 = 12; // Display pin 10
+  int digit3 = 14; // Display pin 4
+  int digit4 = 15; // Display pin 6
 
   // Declare what pins are connected to the segments (anodes)
-  int segA = 16; // 19; //Pin 12
-  int segB = 17; // 18; //Pin 11
-  int segC = 18; // 17; //Pin 3
-  int segD = 19; // 16; //Pin 8
-  int segE = 20; // 15; //Pin 2
-  int segF = 21; // 14; //Pin 9
-  int segG = 22; // 12; //Pin 7
-  int segDP= 23; // 11; //Pin 5
+  int segA = 16; // Display pin 12
+  int segB = 17; // Display pin 11
+  int segC = 18; // Display pin 3
+  int segD = 19; // Display pin 8
+  int segE = 20; // Display pin 2
+  int segF = 21; // Display pin 9
+  int segG = 22; // Display pin 7
+  int segDP= 23; // Display pin 5
 
   bubbleDisplay.Begin(
     displayType,
@@ -122,6 +148,13 @@ void setupDisplay() {
 }
 
 
+/*
+  Writes message to display.
+
+  Arguments:
+    value: int The value to display, max 3 digit number. Will be right aligned.
+    prefix: int Single character prefix for display. Will be left aligned.
+*/
 void writeToDisplay(int value, int prefix) {
   char tempString[10];
   sprintf(tempString, "%4d", value);
@@ -130,6 +163,13 @@ void writeToDisplay(int value, int prefix) {
 }
 
 
+/*
+  Determines if an encoder value should be displayed and if so which one.
+  If encoder's showValue property is true, it is considered for display. The
+  encoder with most recent start time is displayed. Or none.
+
+  Returns: int Encoder to display or -1 to display none.
+*/
 int getEncoderToDisplay() {
   int encoderIndex = -1;
   unsigned long maxTime = 0;

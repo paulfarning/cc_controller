@@ -33,6 +33,9 @@ CcButton::CcButton(
 }
 
 
+/*
+  Initializes inputs and outputs.
+*/
 void CcButton::begin() {
   pinMode(_btnPin, INPUT_PULLUP);
   pinMode(_ledPin, OUTPUT);
@@ -40,6 +43,10 @@ void CcButton::begin() {
 }
 
 
+/*
+  Computes changes on inputs and outputs.
+  Sends MIDI messages and toggles LEDs based on current state.
+*/
 void CcButton::update() {
 
   _btn.update();

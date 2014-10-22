@@ -35,8 +35,8 @@ class CcButton {
     int _cc;            // CC number.
     int _midiChannel;   // MIDI channel to broadcast on.
     char * _ccName;     // Name for control.
-    Bounce _btn;        // Debounced button.
     int _reading;       // Current state of button.
+    Bounce _btn;        // Debounced button.
 };
 
 #endif

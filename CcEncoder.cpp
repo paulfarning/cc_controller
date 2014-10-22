@@ -1,6 +1,7 @@
 /*
   CcEncoder.cpp - Library MIDI CC Controls.
-  Creates an encoder that sets a value between 0 and 127.
+  Creates an encoder that sets a value between 0 and 127 and configures its
+  button functionality.
 */
 
 #include "Arduino.h"
@@ -30,11 +31,17 @@ CcEncoder::CcEncoder(
 }
 
 
+/*
+  Initializes inputs and outputs.
+*/
 void CcEncoder::begin() {
   pinMode(_pin3, INPUT_PULLUP);
 }
 
 
+/*
+  Computes changes on inputs and outputs and sets values base on current state.
+*/
 void CcEncoder::update() {
 
   int move = _encoder.tick();
@@ -64,17 +71,34 @@ void CcEncoder::update() {
     }
   }
 
-
 }
 
+
+/*
+  Gets the encoder value.
+
+  Returns: int Encoder value.
+*/
 int CcEncoder::read() {
   return _value;
 }
 
+
+/*
+  Determines if encoder value is candidate to display.
+
+  Returns: int Display value.
+*/
 int CcEncoder::showValue() {
   return _displayValue;
 }
 
+
+/*
+  Gets time started to display value.
+
+  Returns: long Start time.
+*/
 int CcEncoder::getStartTime() {
   return _startTime;
 }

@@ -17,6 +17,5 @@
 
 
 Features:
-1. Push encoder button to enter midichannel change mode, push again to set
-2. Remember last settings
-3. Push both show midi channel.
+1. Remember last settings
+2. Push both show midi channel. http://forum.arduino.cc/index.php/topic,44911.0.html

@@ -1,6 +1,7 @@
 /*
   CcEncoder.h - Library MIDI CC Controls.
-  Creates an encoder that sets a value between 0 and 127.
+  Creates an encoder that sets a value between 0 and 127 and configures its
+  button functionality.
 */
 
 #ifndef CcEncoder_h
@@ -16,7 +17,7 @@ class CcEncoder {
       int pin3,           // Button pin.
       int maxValue,       // Max value for encoder.
       int minValue,       // Min value for encoder.
-      int debounceMS,   // Debounce time in milliseconds.
+      int debounceMS,     // Debounce time in milliseconds.
       char ccName[]       // Name for control.
     );
     void begin();         // Initialize. Call from setup.
@@ -34,9 +35,9 @@ class CcEncoder {
     char * _ccName;       // Name for control.
     QuadEncoder _encoder; // Encoder.
     Bounce _btn;          // Debounced button.
-    int _displayValue = false;
-    long _displayTimeout = 4000;
-    long _startTime = 0;
+    int _displayValue = false;    // Whether or not to show on display.
+    long _displayTimeout = 4000;  // How long to show on display.
+    long _startTime = 0;          // Time when started showing on display.
 };
 
 #endif
