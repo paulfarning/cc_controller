@@ -1,8 +1,8 @@
-/*
-  CcEncoder.h - Library MIDI CC Controls.
-  Creates an encoder that sets a value between 0 and 127 and configures its
-  button functionality.
-*/
+/**
+ * CcEncoder.h - Library MIDI CC Controls.
+ * Creates an encoder that sets a value between 0 and 127 and configures its
+ * button functionality.
+ */
 
 #ifndef CcEncoder_h
 #define CcEncoder_h

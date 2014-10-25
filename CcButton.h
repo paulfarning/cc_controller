@@ -1,8 +1,8 @@
-/*
-  CcButton.h - Library MIDI CC Controls.
-  Creates a button that toggles between two values of a specific
-  MIDI control along with corresponding LED.
-*/
+/**
+ * CcButton.h - Library MIDI CC Controls.
+ * Creates a button that toggles between two values of a specific
+ * MIDI control along with corresponding LED.
+ */
 
 #ifndef CcButton_h
 #define CcButton_h

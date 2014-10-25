@@ -1,8 +1,8 @@
-/*
-  CcButton.cpp - Library MIDI CC Controls.
-  Creates a button that toggles between two values of a specific
-  MIDI control along with corresponding LED.
-*/
+/**
+ * CcButton.cpp - Library MIDI CC Controls.
+ * Creates a button that toggles between two values of a specific
+ * MIDI control along with corresponding LED.
+ */
 
 #include "Arduino.h"
 #include "Bounce.h"
@@ -33,9 +33,9 @@ CcButton::CcButton(
 }
 
 
-/*
-  Initializes inputs and outputs.
-*/
+/**
+ * Initializes inputs and outputs.
+ */
 void CcButton::begin() {
   pinMode(_btnPin, INPUT_PULLUP);
   pinMode(_ledPin, OUTPUT);
@@ -43,10 +43,10 @@ void CcButton::begin() {
 }
 
 
-/*
-  Computes changes on inputs and outputs.
-  Sends MIDI messages and toggles LEDs based on current state.
-*/
+/**
+ * Computes changes on inputs and outputs.
+ * Sends MIDI messages and toggles LEDs based on current state.
+ */
 void CcButton::update() {
 
   _btn.update();

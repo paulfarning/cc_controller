@@ -1,25 +1,25 @@
-/*
-  CC Controller
-
-  MIDI controller with 2 encoders, a 4 digit display, 5 buttons and 4 LEDs.
-  Four of the buttons toggle specific CC messages and a corresponding LED. The
-  encoders can be used to select a CC number and value to send with the fifth
-  button. The display shows the midi channel on startup and the encoder values
-  when editing or when pushed.
-
-  Built for Teensy 3.1.
-
-  Created 10.20.2014
-  By Paul Farning
-
-  https://github.com/paulfarning/cc_controller
-*/
+/**
+ * CC Controller
+ *
+ * MIDI controller with 2 encoders, a 4 digit display, 5 buttons and 4 LEDs.
+ * Four of the buttons toggle specific CC messages and a corresponding LED. The
+ * encoders can be used to select a CC number and value to send with the fifth
+ * button. The display shows the midi channel on startup and the encoder values
+ * when editing or when pushed.
+ *
+ * Built for Teensy 3.1.
+ *
+ * Created 10.20.2014
+ * By Paul Farning
+ *
+ * https://github.com/paulfarning/cc_controller
+ */
 
 
 #include <Bounce.h>
 #include <MIDI.h>
 #include <QuadEncoder.h>
-#include "SevSeg.h"
+#include <SevSeg.h>
 #include "CcButton.h"
 #include "CcEncoder.h"
 
@@ -50,13 +50,13 @@ CcEncoder CcEncoders[] = {
 Bounce sendEncodersBtn = Bounce(sendEncodersBtnPin, debounceMS);
 
 
-/*
-  Initializes inputs and outputs.
-*/
+/**
+ * Initializes inputs and outputs.
+ */
 void setup() {
   Serial.begin(9600);
   MIDI.begin();
-  pinMode(4, INPUT_PULLUP); // WHY????
+  pinMode(sendEncodersBtnPin, INPUT_PULLUP);
 
   for(int i = 0; i < ARRAY_SIZE(CcButtons); i++) {
     CcButtons[i].begin();
@@ -71,32 +71,45 @@ void setup() {
 }
 
 
-/*
-  Computes changes on all inputs and outputs.
-*/
+/**
+ * Computes changes on all inputs and outputs.
+ */
 void loop() {
 
   currentMillis = millis();
 
+  // Display midi channel on startup.
   if (currentMillis < initDelay && encoderToDisplay == -1) {
     writeToDisplay(midiChannel, 'c');
   }
 
+  // Send encoders if button pushed.
   if (sendEncodersBtn.update()) {
     if (sendEncodersBtn.fallingEdge()) {
-      MIDI.sendControlChange(102, 108, midiChannel);
-      Serial.print(CcEncoders[0].read());
+      usbMIDI.sendControlChange(
+        CcEncoders[1].read(),
+        CcEncoders[0].read(),
+        midiChannel
+      );
+      MIDI.sendControlChange(
+        CcEncoders[1].read(),
+        CcEncoders[0].read(),
+        midiChannel
+      );
     }
   }
 
+  // Update CC buttons.
   for (int i = 0; i < ARRAY_SIZE(CcButtons); i++) {
     CcButtons[i].update();
   }
 
+  // Update encoders.
   for (int i = 0; i < ARRAY_SIZE(CcEncoders); i++) {
     CcEncoders[i].update();
   }
 
+  // Update display with encoder value if changed.
   encoderToDisplay = getEncoderToDisplay();
   if (encoderToDisplay != -1) {
     writeToDisplay(CcEncoders[encoderToDisplay].read(), ' ');
@@ -105,9 +118,9 @@ void loop() {
 }
 
 
-/*
-  Initializes the 4 digit, 7 segment display.
-*/
+/**
+ * Initializes the 4 digit, 7 segment display.
+ */
 void setupDisplay() {
   int displayType = COMMON_CATHODE;
   int numberOfDigits = 4;
@@ -148,13 +161,11 @@ void setupDisplay() {
 }
 
 
-/*
-  Writes message to display.
-
-  Arguments:
-    value: int The value to display, max 3 digit number. Will be right aligned.
-    prefix: int Single character prefix for display. Will be left aligned.
-*/
+/**
+ * Writes message to display.
+ * @param {int} value The value to display, max 3 digit number. Will be right aligned.
+ * @param {int} prefix Single character prefix for display. Will be left aligned.
+ */
 void writeToDisplay(int value, int prefix) {
   char tempString[10];
   sprintf(tempString, "%4d", value);
@@ -163,13 +174,12 @@ void writeToDisplay(int value, int prefix) {
 }
 
 
-/*
-  Determines if an encoder value should be displayed and if so which one.
-  If encoder's showValue property is true, it is considered for display. The
-  encoder with most recent start time is displayed. Or none.
-
-  Returns: int Encoder to display or -1 to display none.
-*/
+/**
+ * Determines if an encoder value should be displayed and if so which one.
+ * If encoder's showValue property is true, it is considered for display. The
+ * encoder with most recent start time is displayed. Or none.
+ * @return {int} Encoder to display or -1 to display none.
+ */
 int getEncoderToDisplay() {
   int encoderIndex = -1;
   unsigned long maxTime = 0;
