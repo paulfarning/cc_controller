@@ -62,8 +62,14 @@ Push a dedicated CC button to send a midi message to toggle its value and
 toggle the corresponding LED.
 
 Encoder 1 selects the CC number to be sent. Encoder 2 selects the value to set
-that for that number. Each has a range of 0 to 127. The encoders are also
-buttons. Press them to display their current value.
+for that number. Each has a range of 0 to 127. The encoders are also buttons.
+Press them to display their current value.
 
-Press the additional push button to send the midi number and value pair message
-set with the encoders.
+Press the additional push button to send the midi message with the current
+number and value pair of the encoders.
+
+## Example build
+The extra jacks and led are for a
+[Dtronics midi to trigger kit](http://www.synthcity.nl/midi/midi-to-trigger-interface.html).  
+![Front](controller/front.jpg?raw=true)  
+![back](controller/back.jpg?raw=true)
