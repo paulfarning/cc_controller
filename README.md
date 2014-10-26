@@ -71,5 +71,5 @@ number and value pair of the encoders.
 ## Example build
 The extra jacks and led are for a
 [Dtronics midi to trigger kit](http://www.synthcity.nl/midi/midi-to-trigger-interface.html).  
-![Front](controller/front.jpg?raw=true)  
+![Front](controller/front.jpg?raw=true)
 ![back](controller/back.jpg?raw=true)
