@@ -17,7 +17,6 @@ CcButton::CcButton(
   int valueOff,
   int valueOn,
   int cc,
-  int midiChannel,
   int debounceMS,
   char ccName[]
 ) : _btn(btnPin, debounceMS) {
@@ -29,7 +28,6 @@ CcButton::CcButton(
   _valueOn = valueOn;
   _cc = cc;
   _ccName = ccName;
-  _midiChannel = midiChannel;
 }
 
 
@@ -44,22 +42,22 @@ void CcButton::begin() {
 
 
 /**
- * Computes changes on inputs and outputs.
+ * Computes changes on  inputs and outputs.
  * Sends MIDI messages and toggles LEDs based on current state.
  */
-void CcButton::update() {
+void CcButton::update(int midiChannel) {
 
   _btn.update();
   _reading = _btn.read();
 
   if (_reading != _previous && _btn.fallingEdge()) {
     if (_state == HIGH) {
-      usbMIDI.sendControlChange(_cc, _valueOn, _midiChannel);
-      MIDI.sendControlChange(_cc, _valueOn, _midiChannel);
+      usbMIDI.sendControlChange(_cc, _valueOn, midiChannel);
+      MIDI.sendControlChange(_cc, _valueOn, midiChannel);
       // sprintf(buffer, "Toggle %s led on: %x", _ccName, _valueOn);
     } else {
-      usbMIDI.sendControlChange(_cc, _valueOff, _midiChannel);
-      MIDI.sendControlChange(_cc, _valueOff, _midiChannel);
+      usbMIDI.sendControlChange(_cc, _valueOff, midiChannel);
+      MIDI.sendControlChange(_cc, _valueOff, midiChannel);
       // sprintf(buffer, "Toggle %s led off: %x", _ccName, _valueOff);
     }
     // Serial.println(buffer);

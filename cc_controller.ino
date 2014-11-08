@@ -16,6 +16,10 @@
  */
 
 
+// Memory. Extern. Or other means.
+// http://forum.arduino.cc/index.php?topic=120026.0
+
+
 #include <Bounce.h>
 #include <MIDI.h>
 #include <QuadEncoder.h>
@@ -25,21 +29,21 @@
 
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 
-const int midiChannel = 1;
 const int debounceMS = 500;
 const int sendEncodersBtnPin = 2;
 const int initDelay = 4000;
 
 unsigned long currentMillis;
 int encoderToDisplay = -1;
+int midiChannel = 1;
 
 SevSeg bubbleDisplay;
 
 CcButton CcButtons[] = {
-  CcButton(3, 7, HIGH, LOW, 127, 0, 122, midiChannel, debounceMS, "Local"),
-  CcButton(4, 8, HIGH, LOW, 0, 127, 117, midiChannel, debounceMS, "Arp Hold"),
-  CcButton(5, 9, HIGH, LOW, 127, 0, 110, midiChannel, debounceMS, "LFO"),
-  CcButton(6, 10, HIGH, LOW, 0, 127, 109, midiChannel, debounceMS, "Legato")
+  CcButton(3, 7, HIGH, LOW, 127, 0, 122, debounceMS, "Local"),
+  CcButton(4, 8, HIGH, LOW, 0, 127, 117, debounceMS, "Arp Hold"),
+  CcButton(5, 9, HIGH, LOW, 127, 0, 110, debounceMS, "LFO"),
+  CcButton(6, 10, HIGH, LOW, 0, 127, 109, debounceMS, "Legato")
 };
 
 CcEncoder CcEncoders[] = {
@@ -101,7 +105,7 @@ void loop() {
 
   // Update CC buttons.
   for (int i = 0; i < ARRAY_SIZE(CcButtons); i++) {
-    CcButtons[i].update();
+    CcButtons[i].update(midiChannel);
   }
 
   // Update encoders.
