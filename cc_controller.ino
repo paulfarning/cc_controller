@@ -16,9 +16,6 @@
  */
 
 
-// Memory. Extern. Or other means.
-// http://forum.arduino.cc/index.php?topic=120026.0
-
 
 #include <Bounce.h>
 #include <MIDI.h>
@@ -33,9 +30,9 @@ const int debounceMS = 500;
 const int sendEncodersBtnPin = 2;
 const int initDelay = 4000;
 
-unsigned long currentMillis;
 int encoderToDisplay = -1;
 int midiChannel = 1;
+unsigned long currentMillis;
 
 SevSeg bubbleDisplay;
 
@@ -89,7 +86,7 @@ void loop() {
 
   // Send encoders if button pushed.
   if (sendEncodersBtn.update()) {
-    if (sendEncodersBtn.fallingEdge()) {
+    if (sendEncodersBtn.risingEdge()) {
       usbMIDI.sendControlChange(
         CcEncoders[1].read(),
         CcEncoders[0].read(),

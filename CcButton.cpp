@@ -44,6 +44,7 @@ void CcButton::begin() {
 /**
  * Computes changes on  inputs and outputs.
  * Sends MIDI messages and toggles LEDs based on current state.
+ * @param {int} midiChannel MIDI channel to send message on.
  */
 void CcButton::update(int midiChannel) {
 

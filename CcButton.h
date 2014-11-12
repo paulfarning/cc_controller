@@ -23,7 +23,7 @@ class CcButton {
       char ccName[]     // Name for control.
     );
     void begin();       // Initialize. Call from setup.
-    void update(int midiChannel);      // Process. Call from loop.
+    void update(int midiChannel); // Process. Call from loop.
   private:
     int _btnPin;        // Pin button is on.
     int _ledPin;        // Pin LED is on.
