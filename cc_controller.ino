@@ -4,13 +4,17 @@
  * MIDI controller with 2 encoders, a 4 digit display, 5 buttons and 4 LEDs.
  * Four of the buttons toggle specific CC messages and a corresponding LED. The
  * encoders can be used to select a CC number and value to send with the fifth
- * button. The display shows the midi channel on startup and the encoder values
- * when editing or when pushed.
+ * button. They also have an alternate mode for changing the midi channel
+ * enabled by holding the fifth button for >2 seconds. The display shows the
+ * midi channel on startup and when in alternate mode and the encoder values
+ * when editing or when they are pushed.
  *
  * Built for Teensy 3.1.
  *
  * Created 10.20.2014
- * By Paul Farning
+ *
+ * Updated 11.13.2014
+ * Add functionality to change midi channel from hardware.
  *
  * https://github.com/paulfarning/cc_controller
  */
@@ -23,17 +27,18 @@
 #include <SevSeg.h>
 #include "CcButton.h"
 #include "CcEncoder.h"
-#include "MomentaryButton.h"
 
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 
 const int debounceMS = 500;
 const int holdMS = 2000;
-const int sendEncodersBtnPin = 2;
 const int initDelay = 4000;
+const int sendEncodersBtnPin = 2;
+
+int midiChannel = 1;
 
 int encoderToDisplay = -1;
-int midiChannel = 1;
+bool changeMidiChannelMode = false;
 unsigned long currentMillis;
 
 SevSeg bubbleDisplay;
@@ -46,27 +51,16 @@ CcButton CcButtons[] = {
 };
 
 CcEncoder CcEncoders[] = {
-  CcEncoder(28, 27, 26, 127, 0, debounceMS, "CC Number"), // Left encoder
-  CcEncoder(31, 30, 29, 127, 0, debounceMS, "CC Value") // Right encoder
+  CcEncoder(31, 30, 29, 127, 0, 0, 16, 1, midiChannel, debounceMS, "CC Number"), // Left encoder
+  CcEncoder(28, 27, 26, 127, 0, 0, 0, 0, 0, debounceMS, "CC Value") // Right encoder
 };
 
-// Bounce sendEncodersBtn = Bounce(sendEncodersBtnPin, debounceMS);
-
-// MomentaryButton button(sendEncodersBtnPin);
-
-// int buttonVal;
-// int btnUpTime;
-// int buttonLast;
-// int ignoreUp;
-// unsigned long btnDnTime;
-
-
-
+// changeMidiChannelMode config and storage.
 unsigned long keyPrevMillis = 0;
 const unsigned long keySampleIntervalMs = 25;
-byte longKeyPressCountMax = 80;    // 80 * 25 = 2000 ms
+byte longKeyPressCountMax = holdMS / keySampleIntervalMs;
 byte longKeyPressCount = 0;
-byte prevKeyState = HIGH;         // button is active low
+byte prevKeyState = HIGH;
 
 
 /**
@@ -85,8 +79,6 @@ void setup() {
     CcEncoders[i].begin();
   }
 
-  // button.setup();
-
   setupDisplay();
 
 }
@@ -99,93 +91,47 @@ void loop() {
 
   currentMillis = millis();
 
-  // Display midi channel on startup.
-  if (currentMillis < initDelay && encoderToDisplay == -1) {
+  // Display midi channel on startup or when in change channel mode.
+  if ((currentMillis < initDelay && encoderToDisplay == -1) ||
+      changeMidiChannelMode) {
     writeToDisplay(midiChannel, 'c');
   }
 
-  // Send encoders if button pushed.
-  // if (sendEncodersBtn.update()) {
-  //   if (sendEncodersBtn.fallingEdge()) {
-  //     Serial.println("clicked");
-  //     usbMIDI.sendControlChange(
-  //       CcEncoders[1].read(),
-  //       CcEncoders[0].read(),
-  //       midiChannel
-  //     );
-  //     MIDI.sendControlChange(
-  //       CcEncoders[1].read(),
-  //       CcEncoders[0].read(),
-  //       midiChannel
-  //     );
-  //   }
-  // }
+  // Update sendEncodersBtn mode and state.
+  // If short press, evaluate based on changeMidiChannelMode value.
+  // If held, enter changeMidiChannelMode and reset on next short press.
+  // Base on code from:
+  // http://forum.arduino.cc/index.php?PHPSESSID=u97ebbav3ubd4qkvkkbo5k7bo0&topic=140123.msg1052582#msg1052582
+  if (currentMillis - keyPrevMillis >= keySampleIntervalMs) {
+    keyPrevMillis = currentMillis;
 
-  // button.check();
-  // if (button.wasClicked()) {
-  //   Serial.println("clicked");
-  // } else if (button.wasHeld()) {
-  //   Serial.println("held");
-  // }
+    byte currKeyState = digitalRead(sendEncodersBtnPin);
 
-  // if (sendEncodersBtn.update()) {
-  //   button.check();
-  //   if (button.wasClicked()) {
-  //     if (sendEncodersBtn.fallingEdge()) {
-  //       Serial.println("clicked");
-  //       usbMIDI.sendControlChange(
-  //         CcEncoders[1].read(),
-  //         CcEncoders[0].read(),
-  //         midiChannel
-  //       );
-  //       MIDI.sendControlChange(
-  //         CcEncoders[1].read(),
-  //         CcEncoders[0].read(),
-  //         midiChannel
-  //       );
-  //     }
-  //   } else if (button.wasHeld()) {
-  //    if (sendEncodersBtn.risingEdge()) {
-  //       Serial.println("held");
+    if ((prevKeyState == HIGH) && (currKeyState == LOW)) {
 
-  //       usbMIDI.sendControlChange(
-  //         CcEncoders[1].read(),
-  //         CcEncoders[0].read(),
-  //         midiChannel
-  //       );
-  //       MIDI.sendControlChange(
-  //         CcEncoders[1].read(),
-  //         CcEncoders[0].read(),
-  //         midiChannel
-  //       );
-  //     }
-  //   }
-  // }
+      longKeyPressCount = 0;
 
-  // checkEncodersButton();
+    } else if ((prevKeyState == LOW) && (currKeyState == HIGH)) {
 
-
-    if (millis() - keyPrevMillis >= keySampleIntervalMs) {
-        keyPrevMillis = millis();
-
-        byte currKeyState = digitalRead(sendEncodersBtnPin);
-
-        if ((prevKeyState == HIGH) && (currKeyState == LOW)) {
-            keyPress();
+      if (longKeyPressCount < longKeyPressCountMax) {
+        if (changeMidiChannelMode) {
+          sendMidiChannelChange();
+        } else {
+          sendEncoderPair();
         }
-        else if ((prevKeyState == LOW) && (currKeyState == HIGH)) {
-            keyRelease();
-        }
-        else if (currKeyState == LOW) {
-            longKeyPressCount++;
-        }
+        changeMidiChannelMode = false;
+      }
 
-        prevKeyState = currKeyState;
+    } else if (currKeyState == LOW) {
+      longKeyPressCount++;
+
+      if (longKeyPressCount >= longKeyPressCountMax) {
+        changeMidiChannelMode = true;
+      }
     }
 
-
-
-
+    prevKeyState = currKeyState;
+  }
 
   // Update CC buttons.
   for (int i = 0; i < ARRAY_SIZE(CcButtons); i++) {
@@ -194,13 +140,16 @@ void loop() {
 
   // Update encoders.
   for (int i = 0; i < ARRAY_SIZE(CcEncoders); i++) {
-    CcEncoders[i].update();
+    CcEncoders[i].update(changeMidiChannelMode);
+    if (changeMidiChannelMode) {
+      midiChannel = CcEncoders[0].read(true);
+    }
   }
 
   // Update display with encoder value if changed.
   encoderToDisplay = getEncoderToDisplay();
-  if (encoderToDisplay != -1) {
-    writeToDisplay(CcEncoders[encoderToDisplay].read(), ' ');
+  if (encoderToDisplay != -1 && !changeMidiChannelMode) {
+    writeToDisplay(CcEncoders[encoderToDisplay].read(false), ' ');
   }
 
 }
@@ -280,89 +229,27 @@ int getEncoderToDisplay() {
   return encoderIndex;
 }
 
-// void checkEncodersButton() {
-//   // Read the state of the button
-//   buttonVal = digitalRead(sendEncodersBtnPin);
 
-//   // // Test for button pressed and store the down time
-//   if (buttonVal == LOW && buttonLast == HIGH && (millis() - btnUpTime) > long(debounceMS)) {
-//     btnDnTime = millis();
-
-//     Serial.println(btnDnTime);
-//   }
-
-//   // // Test for button release and store the up time
-
-//   if (buttonVal == HIGH && buttonLast == LOW && (millis() - btnDnTime) > long(debounceMS)) {
-//     Serial.println("here");
-//     if (ignoreUp == false) {
-
-//     Serial.println("in");
-//       event1();
-//     } else {
-//       ignoreUp = false;
-
-//     Serial.println("out");
-//     }
-//     btnUpTime = millis();
-
-//     Serial.println("done");
-//   }
-
-//   // // Test for button held down for longer than the hold time
-//   if (buttonVal == LOW && (millis() - btnDnTime) > long(holdMS)) {
-//     event2();
-//     ignoreUp = true;
-//     btnDnTime = millis();
-//   }
-
-//   buttonLast = buttonVal;
-// }
-
-
-// void event1() {
-//   Serial.println("clicked");
-// }
-
-// void event2() {
-//   Serial.println("held");
-// }
-//
-//
-//
-//
-
-
-
-// called when button is kept pressed for less than 2 seconds
-void shortKeyPress() {
-    Serial.println("short");
+/**
+ * Sends the pair of values from encoders as CC message on usb and din.
+ */
+void sendEncoderPair() {
+  usbMIDI.sendControlChange(
+    CcEncoders[0].read(false),
+    CcEncoders[1].read(false),
+    midiChannel
+  );
+  MIDI.sendControlChange(
+    CcEncoders[0].read(false),
+    CcEncoders[1].read(false),
+    midiChannel
+  );
 }
 
 
-// called when button is kept pressed for more than 2 seconds
-void longKeyPress() {
-    Serial.println("long");
+/**
+ * Sets midi channel value.
+ */
+void sendMidiChannelChange() {
+  midiChannel = CcEncoders[0].read(true);
 }
-
-
-// called when key goes from not pressed to pressed
-void keyPress() {
-    Serial.println("key press");
-    longKeyPressCount = 0;
-}
-
-
-// called when key goes from pressed to not pressed
-void keyRelease() {
-    Serial.println("key release");
-
-    if (longKeyPressCount >= longKeyPressCountMax) {
-        longKeyPress();
-    }
-    else {
-        shortKeyPress();
-    }
-}
-
-

@@ -1,7 +1,8 @@
 /**
  * CcEncoder.cpp - Library MIDI CC Controls.
- * Creates an encoder that sets a value between 0 and 127 and configures its
- * button functionality.
+ * Creates an encoder with two exclusive modes that sets an independent value
+ * within a given range for each mode depending on bool passed in at update and
+ * configures its button functionality.
  */
 
 #include "Arduino.h"
@@ -13,18 +14,25 @@ CcEncoder::CcEncoder(
   int pin1,
   int pin2,
   int pin3,
-  int maxValue,
-  int minValue,
+  int maxValueA,
+  int minValueA,
+  int defaultA,
+  int maxValueB,
+  int minValueB,
+  int defaultB,
   int debounceMS,
   char ccName[]
 ) : _encoder(pin1, pin2), _btn(pin3, debounceMS) {
   _pin1 = pin1;
   _pin2 = pin2;
   _pin3 = pin3;
-  _maxValue = maxValue;
-  _minValue = minValue;
+  _maxValueA = maxValueA;
+  _minValueA = minValueA;
+  _valueA = defaultA;
+  _maxValueB = maxValueB;
+  _minValueB = minValueB;
+  _valueB = defaultB;
   _ccName = ccName;
-  _value = 0;
   _displayValue = false;
   _displayTimeout = 4000;
   _startTime = 0;
@@ -42,15 +50,23 @@ void CcEncoder::begin() {
 /**
  * Computes changes on inputs and outputs and sets values base on current state.
  */
-void CcEncoder::update() {
+void CcEncoder::update(bool alternateValue) {
 
   int move = _encoder.tick();
 
   if (move == '>' || move == '<') {
     if (move == '>') {
-      _value = _value < _maxValue ? _value + 1 : _minValue;
+      if (alternateValue) {
+        _valueB = _valueB < _maxValueB ? _valueB + 1 : _minValueB;
+      } else {
+        _valueA = _valueA < _maxValueA ? _valueA + 1 : _minValueA;
+      }
     } else if (move == '<') {
-      _value = _value > _minValue ? _value - 1 : _maxValue;
+      if (alternateValue) {
+        _valueB = _valueB > _minValueB ? _valueB - 1 : _maxValueB;
+      } else {
+        _valueA = _valueA > _minValueA ? _valueA - 1 : _maxValueA;
+      }
     }
     _startTime = millis();
     _displayValue = true;
@@ -78,8 +94,8 @@ void CcEncoder::update() {
  * Gets the encoder value.
  * @return {int} Encoder value.
  */
-int CcEncoder::read() {
-  return _value;
+int CcEncoder::read(bool alternateValue) {
+  return alternateValue ? _valueB : _valueA;
 }
 
 
