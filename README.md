@@ -3,8 +3,9 @@
 MIDI controller with 2 encoders, a 4 segment display, 5 buttons and 4 LEDs.
 Four of the buttons toggle specific CC messages and a corresponding LED. The
 encoders can be used to select a CC number and value to send with the fifth
-button. The display shows the midi channel on startup and the encoder values
-when editing or when pushed.
+button (encode send button). One encoder has an alternate function as well to
+set the midi channel. The display shows the midi channel on startup and the
+encoder values when editing or when pushed.
 
 Built on [Teensy 3.1](https://www.pjrc.com/teensy/).
 
@@ -61,12 +62,19 @@ messages.
 Push a dedicated CC button to send a midi message to toggle its value and
 toggle the corresponding LED.
 
-Encoder 1 selects the CC number to be sent. Encoder 2 selects the value to set
-for that number. Each has a range of 0 to 127. The encoders are also buttons.
-Press them to display their current value.
+The encoders and endcoder send button have two modes. To enter the alternate
+mode press and hold the encoder send button for more than two seconds.
 
-Press the additional push button to send the midi message with the current
+In default mode, Encoder 1 selects the CC number to be sent. Encoder 2 selects
+the value to set for that number. Each has a range of 0 to 127. The encoders are
+also buttons. Press them to display their current value.
+
+Press the encoder send button to send the midi message with the current
 number and value pair of the encoders.
+
+In alternate mode, Encoder 1 selects the midi channel to send messages on. It
+has a range of 1 to 16. Press the encoder send button to set the midi channel
+and exit the alternate mode.
 
 ## Example build
 The extra jacks and led are for a
