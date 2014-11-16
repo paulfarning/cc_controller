@@ -30,6 +30,7 @@ class CcEncoder {
     int read(bool alternateValue); // Get the current value of encoder.
     int showValue();      // Whether or not to display value.
     int getStartTime();   // Return time last changed.
+    void setValue(int value, bool alternateValue); // Sets the encoder value.
   private:
     int _pin1;            // Leg 1 pin.
     int _pin2;            // Leg 3 pin.

@@ -49,6 +49,7 @@ void CcEncoder::begin() {
 
 /**
  * Computes changes on inputs and outputs and sets values base on current state.
+ * @param {bool} alternateValue Whether or not to use alternate value.
  */
 void CcEncoder::update(bool alternateValue) {
 
@@ -69,7 +70,7 @@ void CcEncoder::update(bool alternateValue) {
       }
     }
     _startTime = millis();
-    _displayValue = true;
+    _displayValue = alternateValue ? false : true;
   } else {
     if (millis() - _startTime > _displayTimeout) {
       _displayValue = false;
@@ -92,6 +93,7 @@ void CcEncoder::update(bool alternateValue) {
 
 /**
  * Gets the encoder value.
+ * @param {bool} alternateValue Whether or not to read alternate value.
  * @return {int} Encoder value.
  */
 int CcEncoder::read(bool alternateValue) {
@@ -101,7 +103,7 @@ int CcEncoder::read(bool alternateValue) {
 
 /**
  * Determines if encoder value is candidate to display.
- * Return {int} Display value.
+ * @return {int} Display value.
  */
 int CcEncoder::showValue() {
   return _displayValue;
@@ -114,4 +116,18 @@ int CcEncoder::showValue() {
  */
 int CcEncoder::getStartTime() {
   return _startTime;
+}
+
+
+/**
+ * Sets the encoder current value.
+ * @param {int} value The value to set the encoder to.
+ * @param {bool} alternateValue Whether or not to set alternate value.
+ */
+void CcEncoder::setValue(int value, bool alternateValue) {
+  if (alternateValue) {
+    _valueB = value;
+  } else {
+    _valueA = value;
+  }
 }

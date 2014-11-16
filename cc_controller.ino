@@ -12,9 +12,7 @@
  * Built for Teensy 3.1.
  *
  * Created 10.20.2014
- *
- * Updated 11.13.2014
- * Add functionality to change midi channel from hardware.
+ * Updated 11.16.2014
  *
  * https://github.com/paulfarning/cc_controller
  */
@@ -22,6 +20,7 @@
 
 
 #include <Bounce.h>
+#include <EEPROM.h>
 #include <MIDI.h>
 #include <QuadEncoder.h>
 #include <SevSeg.h>
@@ -34,8 +33,10 @@ const int debounceMS = 500;
 const int holdMS = 2000;
 const int initDelay = 4000;
 const int sendEncodersBtnPin = 2;
+const int midiChannelAddress = 0;
 
 int midiChannel = 1;
+int value;
 
 int encoderToDisplay = -1;
 bool changeMidiChannelMode = false;
@@ -71,6 +72,12 @@ void setup() {
   MIDI.begin();
   pinMode(sendEncodersBtnPin, INPUT_PULLUP);
 
+  value = EEPROM.read(midiChannelAddress);
+
+  if (value > 0 && value < 17) {
+    midiChannel = value;
+  }
+
   for(int i = 0; i < ARRAY_SIZE(CcButtons); i++) {
     CcButtons[i].begin();
   }
@@ -78,6 +85,8 @@ void setup() {
   for(int i = 0; i < ARRAY_SIZE(CcEncoders); i++) {
     CcEncoders[i].begin();
   }
+
+  CcEncoders[0].setValue(midiChannel, true);
 
   setupDisplay();
 
@@ -252,4 +261,5 @@ void sendEncoderPair() {
  */
 void sendMidiChannelChange() {
   midiChannel = CcEncoders[0].read(true);
+  EEPROM.write(midiChannelAddress, midiChannel);
 }

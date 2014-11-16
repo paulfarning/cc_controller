@@ -55,9 +55,12 @@ There is no midi in. No midi data is read from the connected device. The
 state of the LEDs displayed may not match the state of the device when first
 connected. Toggle through the buttons to ensure they are reset and accurate.
 
+Midi channel changes are saved and reloaded when powered on.
+
 ## Device usage
 When powered on the display shows the midi channel to be used for sending
-messages.
+messages. This is either the default [1] or whatever channel was last set
+before shut down.
 
 Push a dedicated CC button to send a midi message to toggle its value and
 toggle the corresponding LED.
@@ -74,7 +77,8 @@ number and value pair of the encoders.
 
 In alternate mode, Encoder 1 selects the midi channel to send messages on. It
 has a range of 1 to 16. Press the encoder send button to set the midi channel
-and exit the alternate mode.
+and exit the alternate mode. The last midi channel used will be remembered
+between power cycles.
 
 ## Example build
 The extra jacks and led are for a
