@@ -11,6 +11,7 @@ Built on [Teensy 3.1](https://www.pjrc.com/teensy/).
 
 ## Required libraries:
 1. [Bounce 1](https://github.com/thomasfredericks/Bounce-Arduino-Wiring)
+1. [EEPROM](https://github.com/arduino/Arduino/tree/master/libraries/EEPROM)
 2. [MIDI v4.2](https://github.com/FortySevenEffects/arduino_midi_library)
 3. [QuadEncoder](https://github.com/medecau/QuadEncoder)
 4. [SevSeg](https://github.com/sparkfun/SevSeg)
