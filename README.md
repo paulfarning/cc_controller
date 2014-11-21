@@ -66,7 +66,7 @@ before shut down.
 Push a dedicated CC button to send a midi message to toggle its value and
 toggle the corresponding LED.
 
-The encoders and endcoder send button have two modes. To enter the alternate
+The encoders and encoder send button have two modes. To enter the alternate
 mode press and hold the encoder send button for more than two seconds.
 
 In default mode, Encoder 1 selects the CC number to be sent. Encoder 2 selects
