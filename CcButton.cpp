@@ -47,7 +47,6 @@ void CcButton::begin() {
  * @param {int} midiChannel MIDI channel to send message on.
  */
 void CcButton::update(int midiChannel) {
-
   _btn.update();
   _reading = _btn.read();
 
@@ -67,5 +66,4 @@ void CcButton::update(int midiChannel) {
     _state = !_state;
   }
   _previous = _reading;
-
 }

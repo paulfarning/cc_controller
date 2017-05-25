@@ -52,7 +52,6 @@ void CcEncoder::begin() {
  * @param {bool} alternateValue Whether or not to use alternate value.
  */
 void CcEncoder::update(bool alternateValue) {
-
   int move = _encoder.tick();
 
   if (move == '>' || move == '<') {
@@ -87,7 +86,6 @@ void CcEncoder::update(bool alternateValue) {
       }
     }
   }
-
 }
 
 

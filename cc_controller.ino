@@ -89,7 +89,6 @@ void setup() {
   CcEncoders[0].setValue(midiChannel, true);
 
   setupDisplay();
-
 }
 
 
@@ -97,7 +96,6 @@ void setup() {
  * Computes changes on all inputs and outputs.
  */
 void loop() {
-
   currentMillis = millis();
 
   // Display midi channel on startup or when in change channel mode.
@@ -109,8 +107,7 @@ void loop() {
   // Update sendEncodersBtn mode and state.
   // If short press, evaluate based on changeMidiChannelMode value.
   // If held, enter changeMidiChannelMode and reset on next short press.
-  // Base on code from:
-  // http://forum.arduino.cc/index.php?PHPSESSID=u97ebbav3ubd4qkvkkbo5k7bo0&topic=140123.msg1052582#msg1052582
+  // Base on code from http://forum.arduino.cc/index.php?topic=140123#msg1052582
   if (currentMillis - keyPrevMillis >= keySampleIntervalMs) {
     keyPrevMillis = currentMillis;
 
@@ -160,7 +157,6 @@ void loop() {
   if (encoderToDisplay != -1 && !changeMidiChannelMode) {
     writeToDisplay(CcEncoders[encoderToDisplay].read(false), ' ');
   }
-
 }
 
 
